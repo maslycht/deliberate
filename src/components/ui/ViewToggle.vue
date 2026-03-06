@@ -12,6 +12,7 @@ defineEmits<{
   <div class="inline-flex border border-line rounded-lg overflow-hidden divide-x divide-line">
     <button
       type="button"
+      :aria-pressed="modelValue === 'list'"
       class="px-4 py-[0.35rem] font-sans text-[0.82rem] cursor-pointer transition-all duration-[120ms]"
       :class="
         modelValue === 'list'
@@ -24,6 +25,7 @@ defineEmits<{
     </button>
     <button
       type="button"
+      :aria-pressed="modelValue === 'table'"
       class="px-4 py-[0.35rem] font-sans text-[0.82rem] cursor-pointer transition-all duration-[120ms]"
       :class="
         modelValue === 'table'
