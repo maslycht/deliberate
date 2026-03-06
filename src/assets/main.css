@@ -18,17 +18,19 @@
 }
 
 @layer base {
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-line) var(--color-canvas);
+  }
+
   body {
     @apply bg-canvas text-ink font-sans min-h-screen;
   }
 
   input:focus,
   textarea:focus {
-    @apply border-accent outline-none shadow-[0_0_0_2px_rgba(200,92,45,0.15)];
-  }
-
-  button:not(:disabled):hover {
-    opacity: 0.85;
+    @apply border-accent outline-none;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 15%, transparent);
   }
 
   ::-webkit-scrollbar {

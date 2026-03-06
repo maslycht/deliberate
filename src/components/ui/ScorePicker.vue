@@ -16,6 +16,7 @@ const labels = ["Poor", "Fair", "OK", "Good", "Great"] as const;
       v-for="n in [1, 2, 3, 4, 5]"
       :key="n"
       :title="labels[n - 1]"
+      type="button"
       class="flex-1 py-[0.45rem] rounded-[7px] font-mono text-[0.9rem] cursor-pointer transition-all duration-100 leading-none"
       :class="
         modelValue === n

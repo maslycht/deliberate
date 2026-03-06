@@ -1,5 +1,6 @@
 <script setup lang="ts">
 defineProps<{
+  id?: string;
   modelValue: string;
   placeholder?: string;
   rows?: number;
@@ -12,6 +13,7 @@ defineEmits<{
 
 <template>
   <textarea
+    :id="id"
     :value="modelValue"
     :placeholder="placeholder"
     :rows="rows ?? 3"

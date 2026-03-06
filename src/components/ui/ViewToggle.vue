@@ -9,9 +9,10 @@ defineEmits<{
 </script>
 
 <template>
-  <div class="inline-flex border border-line rounded-lg overflow-hidden">
+  <div class="inline-flex border border-line rounded-lg overflow-hidden divide-x divide-line">
     <button
-      class="px-4 py-[0.35rem] font-sans text-[0.82rem] border-none border-r border-line cursor-pointer transition-all duration-[120ms]"
+      type="button"
+      class="px-4 py-[0.35rem] font-sans text-[0.82rem] cursor-pointer transition-all duration-[120ms]"
       :class="
         modelValue === 'list'
           ? 'bg-ink text-canvas font-semibold'
@@ -22,7 +23,8 @@ defineEmits<{
       List
     </button>
     <button
-      class="px-4 py-[0.35rem] font-sans text-[0.82rem] border-none cursor-pointer transition-all duration-[120ms]"
+      type="button"
+      class="px-4 py-[0.35rem] font-sans text-[0.82rem] cursor-pointer transition-all duration-[120ms]"
       :class="
         modelValue === 'table'
           ? 'bg-ink text-canvas font-semibold'

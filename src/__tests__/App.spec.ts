@@ -3,9 +3,15 @@ import { mount } from "@vue/test-utils";
 import { createRouter, createWebHistory } from "vue-router";
 import App from "../App.vue";
 
+const stub = { template: "<div />" };
+
 const router = createRouter({
   history: createWebHistory(),
-  routes: [{ path: "/", component: { template: "<div />" } }],
+  routes: [
+    { path: "/", name: "setup", component: stub },
+    { path: "/score", name: "score", component: stub },
+    { path: "/results", name: "results", component: stub },
+  ],
 });
 
 describe("App", () => {

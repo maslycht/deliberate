@@ -4,9 +4,9 @@ import { RouterLink, RouterView, useRoute } from "vue-router";
 const route = useRoute();
 
 const tabs = [
-  { name: "setup", label: "Setup", to: "/" },
-  { name: "score", label: "Score", to: "/score" },
-  { name: "results", label: "Results", to: "/results" },
+  { name: "setup", label: "Setup", to: { name: "setup" } },
+  { name: "score", label: "Score", to: { name: "score" } },
+  { name: "results", label: "Results", to: { name: "results" } },
 ] as const;
 </script>
 
@@ -20,11 +20,12 @@ const tabs = [
           Decision Making Tool
         </p>
       </div>
-      <nav class="ml-auto flex gap-1">
+      <nav aria-label="Main navigation" class="ml-auto flex gap-1">
         <RouterLink
           v-for="tab in tabs"
           :key="tab.name"
           :to="tab.to"
+          :aria-current="route.name === tab.name ? 'page' : undefined"
           class="px-4 py-[0.4rem] rounded-md text-[0.82rem] font-semibold font-sans border transition-all duration-150 no-underline"
           :class="
             route.name === tab.name
