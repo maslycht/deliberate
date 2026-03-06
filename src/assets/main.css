@@ -1,1 +1,43 @@
 @import "tailwindcss";
+
+@theme {
+  /* Colors */
+  --color-canvas: #f5f0e8; /* bg-canvas – page background */
+  --color-surface: #fefcf7; /* bg-surface – card background */
+  --color-surface-subtle: #ede8de; /* bg-surface-subtle */
+  --color-line: #ddd7c9; /* border-line */
+  --color-ink: #2a2520; /* text-ink – primary text */
+  --color-ink-muted: #9a9080; /* text-ink-muted – secondary text */
+  --color-accent: #c85c2d; /* bg-accent / text-accent */
+  --color-success: #3d8a5f; /* text-success */
+
+  /* Fonts */
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-sans: "DM Sans", sans-serif; /* overrides Tailwind default */
+  --font-mono: "DM Mono", monospace; /* overrides Tailwind default */
+}
+
+@layer base {
+  body {
+    @apply bg-canvas text-ink font-sans min-h-screen;
+  }
+
+  input:focus,
+  textarea:focus {
+    @apply border-accent outline-none shadow-[0_0_0_2px_rgba(200,92,45,0.15)];
+  }
+
+  button:not(:disabled):hover {
+    opacity: 0.85;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-canvas;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-line rounded-sm;
+  }
+}
