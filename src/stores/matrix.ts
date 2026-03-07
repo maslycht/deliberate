@@ -21,8 +21,10 @@ interface StoredState {
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
+export const MIN_ITEMS = 2;
+
 export function uid(): string {
-  return Math.random().toString(36).slice(2, 9);
+  return crypto.randomUUID();
 }
 
 export function getWeight(idx: number, total: number): number {
@@ -38,7 +40,7 @@ export function getCompletionStatus(
   item: Item,
   categories: Category[],
 ): { done: number; total: number } {
-  const done = categories.filter((c) => item.scores?.[c.id] != null).length;
+  const done = categories.filter((c) => item.scores[c.id] != null).length;
   return { done, total: categories.length };
 }
 
@@ -73,6 +75,10 @@ export const useMatrixStore = defineStore("matrix", () => {
     },
   });
 
+  const isReadyToScore = computed(
+    () => state.value.categories.length >= 1 && state.value.items.length >= MIN_ITEMS,
+  );
+
   function addCategory(name: string) {
     state.value.categories.push({ id: uid(), name });
   }
@@ -88,6 +94,13 @@ export const useMatrixStore = defineStore("matrix", () => {
 
   function updateCategoryName(id: string, name: string) {
     state.value.categories = state.value.categories.map((c) => (c.id === id ? { ...c, name } : c));
+  }
+
+  function moveCategory(from: number, to: number) {
+    const arr = [...state.value.categories];
+    const moved = arr.splice(from, 1)[0]!;
+    arr.splice(to, 0, moved);
+    state.value.categories = arr;
   }
 
   function addItem(name: string, details: string) {
@@ -114,9 +127,11 @@ export const useMatrixStore = defineStore("matrix", () => {
   return {
     categories,
     items,
+    isReadyToScore,
     addCategory,
     removeCategory,
     updateCategoryName,
+    moveCategory,
     addItem,
     removeItem,
     setItemScore,

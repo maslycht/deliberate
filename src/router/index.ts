@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { useMatrixStore } from "@/stores/matrix";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -23,6 +24,13 @@ const router = createRouter({
       redirect: "/",
     },
   ],
+});
+
+router.beforeEach((to) => {
+  const store = useMatrixStore();
+  if (to.name === "score" && !store.isReadyToScore) {
+    return { name: "setup" };
+  }
 });
 
 export default router;

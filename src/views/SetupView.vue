@@ -2,7 +2,7 @@
 import { ref, computed, useTemplateRef } from "vue";
 import { useRouter } from "vue-router";
 import { useSortable, moveArrayElement } from "@vueuse/integrations/useSortable";
-import { useMatrixStore, getWeights, getCompletionStatus } from "@/stores/matrix";
+import { useMatrixStore, getWeights, getCompletionStatus, MIN_ITEMS } from "@/stores/matrix";
 import SectionHeader from "@/components/ui/SectionHeader.vue";
 import EmptyState from "@/components/ui/EmptyState.vue";
 import AppInput from "@/components/ui/AppInput.vue";
@@ -17,7 +17,14 @@ const newItemName = ref("");
 const newItemDetails = ref("");
 
 const weights = computed(() => getWeights(store.categories.length));
-const canScore = computed(() => store.categories.length >= 1 && store.items.length >= 2);
+const canScore = computed(() => store.categories.length >= 1 && store.items.length >= MIN_ITEMS);
+
+const itemsWithCompletion = computed(() =>
+  store.items.map((item) => {
+    const { done, total } = getCompletionStatus(item, store.categories);
+    return { ...item, done, total, complete: total > 0 && done === total };
+  }),
+);
 
 const catListEl = useTemplateRef<HTMLElement>("catList");
 useSortable(catListEl, store.categories, {
@@ -66,6 +73,32 @@ function goToScore() {
           <span class="drag-handle text-ink-muted text-[1.1rem] cursor-grab" aria-hidden="true"
             >⠿</span
           >
+
+          <!-- Keyboard reorder controls -->
+          <div
+            class="flex flex-col gap-0.5 shrink-0"
+            role="group"
+            :aria-label="`Reorder ${cat.name}`"
+          >
+            <button
+              type="button"
+              :disabled="idx === 0"
+              class="text-ink-muted text-[0.65rem] leading-none bg-transparent border-none cursor-pointer disabled:opacity-30 hover:not-disabled:opacity-70 p-0"
+              :aria-label="`Move ${cat.name} up`"
+              @click="store.moveCategory(idx, idx - 1)"
+            >
+              ▲
+            </button>
+            <button
+              type="button"
+              :disabled="idx === store.categories.length - 1"
+              class="text-ink-muted text-[0.65rem] leading-none bg-transparent border-none cursor-pointer disabled:opacity-30 hover:not-disabled:opacity-70 p-0"
+              :aria-label="`Move ${cat.name} down`"
+              @click="store.moveCategory(idx, idx + 1)"
+            >
+              ▼
+            </button>
+          </div>
 
           <span
             class="bg-accent text-canvas rounded-md px-2 py-0.5 text-[0.75rem] font-bold font-mono min-w-[28px] text-center shrink-0"
@@ -118,7 +151,7 @@ function goToScore() {
 
       <div role="list" class="flex flex-col gap-2 mb-5">
         <div
-          v-for="item in store.items"
+          v-for="item in itemsWithCompletion"
           :key="item.id"
           role="listitem"
           class="bg-surface border border-line rounded-[10px] px-4 py-3 flex items-center gap-3"
@@ -134,15 +167,10 @@ function goToScore() {
 
           <span
             class="text-[0.75rem] font-mono shrink-0"
-            :class="
-              getCompletionStatus(item, store.categories).done === store.categories.length &&
-              store.categories.length > 0
-                ? 'text-success'
-                : 'text-ink-muted'
-            "
-            :aria-label="`Scored ${getCompletionStatus(item, store.categories).done} of ${store.categories.length} categories`"
+            :class="item.complete ? 'text-success' : 'text-ink-muted'"
+            :aria-label="`Scored ${item.done} of ${item.total} categories`"
           >
-            {{ getCompletionStatus(item, store.categories).done }}/{{ store.categories.length }}
+            {{ item.done }}/{{ item.total }}
           </span>
 
           <button
@@ -187,7 +215,7 @@ function goToScore() {
           {{
             store.categories.length === 0
               ? "Add at least one category first"
-              : `Add ${2 - store.items.length} more option${store.items.length === 0 ? "s" : ""} to begin`
+              : `Add ${MIN_ITEMS - store.items.length} more option${store.items.length === 0 ? "s" : ""} to begin`
           }}
         </p>
       </div>
