@@ -155,13 +155,20 @@ function goToScore() {
           role="listitem"
           class="bg-surface border border-line rounded-[10px] px-4 py-3 flex items-center gap-3"
         >
-          <div class="flex-1 min-w-0">
-            <div class="font-semibold text-[0.9rem] text-ink truncate">
-              {{ item.name }}
-            </div>
-            <div v-if="item.details" class="text-[0.75rem] text-ink-muted mt-0.5 truncate">
-              {{ item.details }}
-            </div>
+          <div class="flex-1 min-w-0 flex flex-col gap-0.5">
+            <input
+              :value="item.name"
+              class="w-full bg-transparent border-none outline-none font-semibold font-sans text-[0.9rem] text-ink"
+              :aria-label="`Option name for ${item.name}`"
+              @input="store.updateItem(item.id, ($event.target as HTMLInputElement).value, item.details)"
+            />
+            <input
+              :value="item.details"
+              class="w-full bg-transparent border-none outline-none font-sans text-[0.75rem] text-ink-muted"
+              placeholder="Details (optional)…"
+              :aria-label="`Option details for ${item.name}`"
+              @input="store.updateItem(item.id, item.name, ($event.target as HTMLInputElement).value)"
+            />
           </div>
 
           <span

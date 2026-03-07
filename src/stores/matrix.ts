@@ -111,6 +111,12 @@ export const useMatrixStore = defineStore("matrix", () => {
     state.value.items = state.value.items.filter((i) => i.id !== id);
   }
 
+  function updateItem(id: string, name: string, details: string) {
+    state.value.items = state.value.items.map((i) =>
+      i.id === id ? { ...i, name, details } : i,
+    );
+  }
+
   function setItemScore(itemId: string, categoryId: string, score: number) {
     state.value.items = state.value.items.map((item) =>
       item.id === itemId ? { ...item, scores: { ...item.scores, [categoryId]: score } } : item,
@@ -134,6 +140,7 @@ export const useMatrixStore = defineStore("matrix", () => {
     moveCategory,
     addItem,
     removeItem,
+    updateItem,
     setItemScore,
     resetAllScores,
   };
