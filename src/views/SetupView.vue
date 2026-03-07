@@ -17,7 +17,6 @@ const newItemName = ref("");
 const newItemDetails = ref("");
 
 const weights = computed(() => getWeights(store.categories.length));
-const canScore = computed(() => store.categories.length >= 1 && store.items.length >= MIN_ITEMS);
 
 const itemsWithCompletion = computed(() =>
   store.items.map((item) => {
@@ -204,14 +203,18 @@ function goToScore() {
 
       <div class="mt-6 pt-6 border-t border-line">
         <AppButton
-          :disabled="!canScore"
-          :aria-describedby="!canScore ? 'score-hint' : undefined"
+          :disabled="!store.isReadyToScore"
+          :aria-describedby="!store.isReadyToScore ? 'score-hint' : undefined"
           class="w-full"
           @click="goToScore"
         >
           Start Scoring →
         </AppButton>
-        <p v-if="!canScore" id="score-hint" class="text-center text-[0.77rem] text-ink-muted mt-2">
+        <p
+          v-if="!store.isReadyToScore"
+          id="score-hint"
+          class="text-center text-[0.77rem] text-ink-muted mt-2"
+        >
           {{
             store.categories.length === 0
               ? "Add at least one category first"
