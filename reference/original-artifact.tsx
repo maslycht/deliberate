@@ -3,6 +3,31 @@
  *
  * This file is kept as a reference for the Vue 3 rewrite ("Deliberate").
  * It should be removed once all functionality has been translated.
+ *
+ * ─── Porting notes for the Vue 3 rewrite ────────────────────────────────────
+ *
+ * 1. Storage API: Uses window.storage.get()/set() — a Claude artifact-specific
+ *    API that does not exist in a real browser. The Vue rewrite should use
+ *    localStorage directly (or a Pinia persistence plugin).
+ *
+ * 2. ResetButton anti-pattern: ResetButton is defined as a component *inside*
+ *    ScoringTab, so a new component type is created on every render. In Vue,
+ *    use a sibling component or a v-if/v-else template block instead.
+ *
+ * 3. Side effect during render: `setTimeout(() => setCurrentIdx(null), 0)` is
+ *    called inline during rendering (line ~194). In Vue, use a watch or
+ *    nextTick/onMounted to trigger equivalent state transitions.
+ *
+ * 4. DEFAULT_CATEGORIES IDs: uid() is called at module parse time, so default
+ *    category IDs are fixed per page load. In the Vue rewrite, generate IDs
+ *    only when defaults are actually needed (e.g. inside the store initializer).
+ *
+ * 5. Shuffled scoring queue (intentional UX): Items are deliberately shuffled
+ *    into a random queue before scoring to avoid position bias. This must be
+ *    replicated in the Vue rewrite — it is a feature, not an accident.
+ *
+ * 6. No TypeScript types: All props and function parameters are untyped. The
+ *    Vue rewrite must define proper interfaces (Category, Option, Scores, etc.).
  */
 
 import { useState, useEffect, useRef } from "react";

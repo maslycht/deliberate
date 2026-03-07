@@ -28,7 +28,7 @@ src/
   main.ts                 # App entry point
   App.vue                 # Root component (app shell, header, tab navigation)
   router/index.ts         # Vue Router — routes: /, /score, /results
-  stores/                 # Pinia stores
+  stores/                 # Pinia stores (counter.ts is a scaffold placeholder — decision matrix store TBD)
   views/                  # Page-level components (one per route)
     SetupView.vue         # Categories & options management
     ScoringView.vue       # Score each option against categories
@@ -43,6 +43,7 @@ src/
     AppPlaceholder.vue    # Placeholder with icon + message
     EmptyState.vue        # Empty state with dashed border
   assets/main.css         # Tailwind + design system theme variables
+  __tests__/              # Unit tests (co-located with src, not views/)
 ```
 
 ## Design System
@@ -51,6 +52,8 @@ Defined as CSS custom properties in `src/assets/main.css` (mapped to Tailwind th
 
 - **Colors:** canvas, surface, surface-subtle, line, ink, ink-muted, accent (#c85c2d), success (#3d8a5f)
 - **Fonts:** display (Playfair Display), sans (DM Sans), mono (DM Mono)
+
+In templates, use Tailwind utility classes (`bg-accent`, `text-ink-muted`, `border-line`, etc.) rather than raw CSS variables. The `@theme` block in `main.css` registers tokens under a `--color-*` / `--font-*` prefix so Tailwind resolves them, but templates should never reference `var(--accent)` directly.
 
 ## Key Concepts
 
