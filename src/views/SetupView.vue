@@ -159,15 +159,15 @@ function goToScore() {
             <input
               :value="item.name"
               class="w-full bg-transparent border-none outline-none font-semibold font-sans text-[0.9rem] text-ink"
-              :aria-label="`Option name for ${item.name}`"
-              @input="store.updateItem(item.id, ($event.target as HTMLInputElement).value, item.details)"
+              aria-label="Option name"
+              @input="store.updateItemName(item.id, ($event.target as HTMLInputElement).value)"
             />
             <input
               :value="item.details"
               class="w-full bg-transparent border-none outline-none font-sans text-[0.75rem] text-ink-muted"
               placeholder="Details (optional)…"
-              :aria-label="`Option details for ${item.name}`"
-              @input="store.updateItem(item.id, item.name, ($event.target as HTMLInputElement).value)"
+              aria-label="Option details"
+              @input="store.updateItemDetails(item.id, ($event.target as HTMLInputElement).value)"
             />
           </div>
 
