@@ -12,6 +12,7 @@ import AppButton from "@/components/ui/AppButton.vue";
 import ScorePicker from "@/components/ui/ScorePicker.vue";
 import AppPlaceholder from "@/components/ui/AppPlaceholder.vue";
 import SectionHeader from "@/components/ui/SectionHeader.vue";
+import ResetButton from "@/components/ui/ResetButton.vue";
 
 const store = useMatrixStore();
 const router = useRouter();
@@ -21,13 +22,21 @@ const router = useRouter();
 const queue = ref<string[]>([]);
 const currentIdx = ref<number | null>(null);
 const localScores = ref<Record<string, number>>({});
-const confirmReset = ref(false);
 const initialized = ref(false);
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function shuffle<T>(arr: T[]): T[] {
-  return [...arr].sort(() => Math.random() - 0.5);
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j]!, a[i]!];
+  }
+  return a;
+}
+
+function initLocalScores(item: Item | null) {
+  localScores.value = item ? { ...item.scores } : {};
 }
 
 function getScore(categoryId: string): number | null {
@@ -66,10 +75,15 @@ const isLastItem = computed(
   () => currentIdx.value !== null && currentIdx.value === queue.value.length - 1,
 );
 
-const orderedItems = computed(() =>
+const orderedItemsWithStatus = computed(() =>
   queue.value
     .map((id) => store.items.find((i) => i.id === id))
-    .filter((item): item is Item => item != null),
+    .filter((item): item is Item => item != null)
+    .map((item) => ({
+      item,
+      complete: isComplete(item, store.categories),
+      status: getCompletionStatus(item, store.categories),
+    })),
 );
 
 // ─── Watchers ────────────────────────────────────────────────────────────────
@@ -83,40 +97,48 @@ watch(currentIdx, (val) => {
 // ─── Handlers ────────────────────────────────────────────────────────────────
 
 function handleSave() {
-  if (!currentItem.value) return;
-  for (const [categoryId, score] of Object.entries(localScores.value)) {
-    store.setItemScore(currentItem.value.id, categoryId, score);
+  if (currentIdx.value === null || !currentItem.value) return;
+  store.setItemScores(currentItem.value.id, localScores.value);
+  const next = currentIdx.value + 1;
+  if (next >= queue.value.length) {
+    currentIdx.value = null;
+    initLocalScores(null);
+  } else {
+    currentIdx.value = next;
+    initLocalScores(store.items.find((i) => i.id === queue.value[next]) ?? null);
   }
-  localScores.value = {};
-  const next = currentIdx.value! + 1;
-  currentIdx.value = next >= queue.value.length ? null : next;
 }
 
 function handleSkip() {
-  localScores.value = {};
-  const next = currentIdx.value! + 1;
-  currentIdx.value = next >= queue.value.length ? null : next;
+  if (currentIdx.value === null) return;
+  const next = currentIdx.value + 1;
+  if (next >= queue.value.length) {
+    currentIdx.value = null;
+    initLocalScores(null);
+  } else {
+    currentIdx.value = next;
+    initLocalScores(store.items.find((i) => i.id === queue.value[next]) ?? null);
+  }
 }
 
 function handleBackToList() {
-  localScores.value = {};
-  confirmReset.value = false;
+  initLocalScores(null);
   currentIdx.value = null;
 }
 
 function handleSelectItem(itemId: string) {
   const idx = queue.value.indexOf(itemId);
+  // item was removed from store mid-session; fall back to start
   currentIdx.value = idx >= 0 ? idx : 0;
-  localScores.value = {};
-  confirmReset.value = false;
+  initLocalScores(store.items.find((i) => i.id === itemId) ?? null);
 }
 
 function handleReset() {
   store.resetAllScores();
-  queue.value = shuffle([...store.items]).map((i) => i.id);
+  const shuffled = shuffle([...store.items]);
+  queue.value = shuffled.map((i) => i.id);
   currentIdx.value = 0;
-  localScores.value = {};
-  confirmReset.value = false;
+  initLocalScores(shuffled[0] ?? null);
 }
 
 function goToResults() {
@@ -130,12 +152,16 @@ onMounted(() => {
     const { done, total } = getCompletionStatus(i, store.categories);
     return done > 0 && done < total;
   });
-  const noScores = store.items.filter((i) => Object.keys(i.scores || {}).length === 0);
+  const noScores = store.items.filter((i) => Object.keys(i.scores).length === 0);
   const complete = store.items.filter((i) => isComplete(i, store.categories));
   const ordered = [...shuffle(incomplete), ...shuffle(noScores), ...shuffle(complete)];
   queue.value = ordered.map((i) => i.id);
-  currentIdx.value = incomplete.length > 0 || noScores.length > 0 ? 0 : null;
-  localScores.value = {};
+  if (incomplete.length > 0 || noScores.length > 0) {
+    currentIdx.value = 0;
+    initLocalScores(ordered[0] ?? null);
+  } else {
+    currentIdx.value = null;
+  }
   initialized.value = true;
 });
 </script>
@@ -163,35 +189,14 @@ onMounted(() => {
     <!-- Top bar -->
     <div class="flex items-center justify-between mb-5">
       <button
+        type="button"
         class="bg-transparent border-none cursor-pointer text-ink-muted text-[0.82rem] font-sans flex items-center gap-[0.3rem] p-0"
+        aria-label="Back to options list"
         @click="handleBackToList"
       >
         ← Back to list
       </button>
-
-      <!-- Reset (scoring view) -->
-      <button
-        v-if="!confirmReset"
-        class="bg-transparent border border-line cursor-pointer text-ink-muted text-[0.78rem] font-sans rounded-md px-[0.7rem] py-[0.3rem]"
-        @click="confirmReset = true"
-      >
-        Reset all scores
-      </button>
-      <div v-else class="flex items-center gap-[0.4rem]">
-        <span class="text-[0.75rem] text-ink-muted font-sans">Sure?</span>
-        <button
-          class="bg-accent border-none cursor-pointer text-canvas text-[0.75rem] font-sans font-semibold rounded-md px-[0.7rem] py-[0.3rem]"
-          @click="handleReset"
-        >
-          Yes, reset
-        </button>
-        <button
-          class="bg-transparent border border-line cursor-pointer text-ink-muted text-[0.75rem] font-sans rounded-md px-[0.7rem] py-[0.3rem]"
-          @click="confirmReset = false"
-        >
-          Cancel
-        </button>
-      </div>
+      <ResetButton @reset="handleReset" />
     </div>
 
     <!-- Progress bar -->
@@ -281,18 +286,19 @@ onMounted(() => {
     <!-- Item list -->
     <div class="flex flex-col gap-2 mb-5">
       <button
-        v-for="item in orderedItems"
+        v-for="{ item, complete, status } in orderedItemsWithStatus"
         :key="item.id"
+        type="button"
+        :aria-label="`Score ${item.name} (${status.done} of ${status.total} rated)`"
         class="bg-surface rounded-[10px] px-4 py-[0.85rem] flex items-center gap-3 cursor-pointer text-left w-full transition-shadow duration-[120ms]"
-        :class="
-          isComplete(item, store.categories) ? 'border border-line' : 'border-[1.5px] border-accent'
-        "
+        :class="complete ? 'border border-line' : 'border-[1.5px] border-accent'"
         @click="handleSelectItem(item.id)"
       >
-        <!-- Status dot -->
+        <!-- Status dot (decorative; info is in aria-label) -->
         <div
+          aria-hidden="true"
           class="w-[10px] h-[10px] rounded-full shrink-0"
-          :class="isComplete(item, store.categories) ? 'bg-success' : 'bg-accent'"
+          :class="complete ? 'bg-success' : 'bg-accent'"
         />
         <!-- Name + details -->
         <div class="flex-1 min-w-0">
@@ -302,44 +308,18 @@ onMounted(() => {
           </div>
         </div>
         <!-- Completion count + chevron -->
-        <div class="shrink-0 flex items-center gap-2">
-          <span
-            class="text-[0.75rem] font-mono"
-            :class="isComplete(item, store.categories) ? 'text-success' : 'text-accent'"
-          >
-            {{ getCompletionStatus(item, store.categories).done }}/{{
-              getCompletionStatus(item, store.categories).total
-            }}
+        <div aria-hidden="true" class="shrink-0 flex items-center gap-2">
+          <span class="text-[0.75rem] font-mono" :class="complete ? 'text-success' : 'text-accent'">
+            {{ status.done }}/{{ status.total }}
           </span>
           <span class="text-ink-muted text-[0.9rem]">›</span>
         </div>
       </button>
     </div>
 
-    <!-- Reset (list view) -->
+    <!-- Reset -->
     <div class="flex justify-center">
-      <button
-        v-if="!confirmReset"
-        class="bg-transparent border border-line cursor-pointer text-ink-muted text-[0.78rem] font-sans rounded-md px-[0.7rem] py-[0.3rem]"
-        @click="confirmReset = true"
-      >
-        Reset all scores
-      </button>
-      <div v-else class="flex items-center gap-[0.4rem]">
-        <span class="text-[0.75rem] text-ink-muted font-sans">Sure?</span>
-        <button
-          class="bg-accent border-none cursor-pointer text-canvas text-[0.75rem] font-sans font-semibold rounded-md px-[0.7rem] py-[0.3rem]"
-          @click="handleReset"
-        >
-          Yes, reset
-        </button>
-        <button
-          class="bg-transparent border border-line cursor-pointer text-ink-muted text-[0.75rem] font-sans rounded-md px-[0.7rem] py-[0.3rem]"
-          @click="confirmReset = false"
-        >
-          Cancel
-        </button>
-      </div>
+      <ResetButton @reset="handleReset" />
     </div>
   </div>
 </template>
