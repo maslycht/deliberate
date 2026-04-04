@@ -68,7 +68,7 @@ const allFilled = computed(() => {
 
 const progress = computed(() => {
   if (currentIdx.value === null || queue.value.length === 0) return 0;
-  return currentIdx.value / queue.value.length;
+  return (currentIdx.value + 1) / queue.value.length;
 });
 
 const isLastItem = computed(
@@ -188,14 +188,9 @@ onMounted(() => {
   <div v-else-if="currentIdx !== null && currentItem" class="max-w-[540px] mx-auto">
     <!-- Top bar -->
     <div class="flex items-center justify-between mb-5">
-      <button
-        type="button"
-        class="bg-transparent border-none cursor-pointer text-ink-muted text-[0.82rem] font-sans flex items-center gap-[0.3rem] p-0"
-        aria-label="Back to options list"
-        @click="handleBackToList"
-      >
+      <AppButton variant="ghost" small aria-label="Back to options list" @click="handleBackToList">
         ← Back to list
-      </button>
+      </AppButton>
       <ResetButton @reset="handleReset" />
     </div>
 
