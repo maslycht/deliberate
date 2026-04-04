@@ -125,6 +125,12 @@ export const useMatrixStore = defineStore("matrix", () => {
     );
   }
 
+  function setItemScores(itemId: string, scores: Record<string, number>) {
+    state.value.items = state.value.items.map((item) =>
+      item.id === itemId ? { ...item, scores: { ...item.scores, ...scores } } : item,
+    );
+  }
+
   function resetAllScores() {
     state.value.items = state.value.items.map((item) => ({
       ...item,
@@ -145,6 +151,7 @@ export const useMatrixStore = defineStore("matrix", () => {
     updateItemName,
     updateItemDetails,
     setItemScore,
+    setItemScores,
     resetAllScores,
   };
 });
