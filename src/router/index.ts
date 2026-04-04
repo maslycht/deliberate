@@ -28,9 +28,9 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   const store = useMatrixStore();
-  if ((to.name === "score" || to.name === "results") && !store.isReadyToScore) {
-    return { name: "setup" };
-  }
+  if (to.name === "score" && !store.isReadyToScore) return { name: "setup" };
+  if (to.name === "results" && !store.isReadyForResults)
+    return { name: store.isReadyToScore ? "score" : "setup" };
 });
 
 export default router;

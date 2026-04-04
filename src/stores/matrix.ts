@@ -79,6 +79,12 @@ export const useMatrixStore = defineStore("matrix", () => {
     () => state.value.categories.length >= 1 && state.value.items.length >= MIN_ITEMS,
   );
 
+  const isReadyForResults = computed(
+    () =>
+      isReadyToScore.value &&
+      state.value.items.every((item) => isComplete(item, state.value.categories)),
+  );
+
   function addCategory(name: string) {
     state.value.categories.push({ id: uid(), name });
   }
@@ -142,6 +148,7 @@ export const useMatrixStore = defineStore("matrix", () => {
     categories,
     items,
     isReadyToScore,
+    isReadyForResults,
     addCategory,
     removeCategory,
     updateCategoryName,
