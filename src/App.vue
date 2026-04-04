@@ -26,6 +26,7 @@ const tabs = [
         <template v-for="tab in tabs" :key="tab.name">
           <span
             v-if="tab.name === 'results' && !store.isReadyForResults"
+            role="link"
             :aria-disabled="true"
             class="px-4 py-[0.4rem] rounded-md text-[0.82rem] font-semibold font-sans border transition-all duration-150 bg-transparent text-canvas/35 border-canvas/10 cursor-default"
           >
