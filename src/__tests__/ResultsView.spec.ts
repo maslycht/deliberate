@@ -94,7 +94,7 @@ describe("ResultsView", () => {
     const { wrapper } = await mountResults();
     // Alpha: 5×5 + 3×1 = 28, Beta: 2×5 + 4×1 = 14
     // With 2 categories: weights are [5, 1]
-    const cards = wrapper.findAll('[class*="bg-surface"]');
+    const cards = wrapper.findAll('[data-testid="result-card"]');
     expect(cards[0]!.text()).toContain("Alpha");
     expect(cards[1]!.text()).toContain("Beta");
   });

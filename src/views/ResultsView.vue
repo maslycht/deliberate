@@ -27,7 +27,7 @@ const ranked = computed<RankedItem[]>(() => {
     .map((item) => {
       const breakdown = store.categories.map((cat, idx) => {
         const w = weights[idx]!;
-        const score = item.scores[cat.id]!;
+        const score = item.scores[cat.id] ?? 0;
         return { cat, weight: w, score, weighted: score * w };
       });
       const total = breakdown.reduce((sum, b) => sum + b.weighted, 0);
@@ -52,6 +52,7 @@ const ranked = computed<RankedItem[]>(() => {
       <div
         v-for="(item, rank) in ranked"
         :key="item.id"
+        data-testid="result-card"
         class="bg-surface rounded-[14px] px-6 py-5 relative overflow-hidden"
         :class="rank === 0 ? 'border-2 border-accent' : 'border border-line'"
       >
@@ -124,14 +125,14 @@ const ranked = computed<RankedItem[]>(() => {
               Rank
             </th>
             <th
-              class="px-4 py-[0.65rem] text-left font-bold text-[0.78rem] text-ink bg-surface-subtle border-b-2 border-line border-l border-line whitespace-nowrap"
+              class="px-4 py-[0.65rem] text-left font-bold text-[0.78rem] text-ink bg-surface-subtle border-b-2 border-line border-l whitespace-nowrap"
             >
               Option
             </th>
             <th
               v-for="(cat, idx) in store.categories"
               :key="cat.id"
-              class="px-4 py-[0.65rem] text-center font-bold text-[0.78rem] text-ink bg-surface-subtle border-b-2 border-line border-l border-line whitespace-nowrap"
+              class="px-4 py-[0.65rem] text-center font-bold text-[0.78rem] text-ink bg-surface-subtle border-b-2 border-line border-l whitespace-nowrap"
             >
               <div>{{ cat.name }}</div>
               <div class="text-[0.68rem] text-ink-muted font-mono font-normal mt-0.5">
@@ -139,7 +140,7 @@ const ranked = computed<RankedItem[]>(() => {
               </div>
             </th>
             <th
-              class="px-4 py-[0.65rem] text-center font-bold text-[0.78rem] text-ink bg-surface-subtle border-b-2 border-line border-l border-line whitespace-nowrap rounded-tr-[10px]"
+              class="px-4 py-[0.65rem] text-center font-bold text-[0.78rem] text-ink bg-surface-subtle border-b-2 border-line border-l whitespace-nowrap rounded-tr-[10px]"
             >
               Total
             </th>
@@ -161,7 +162,7 @@ const ranked = computed<RankedItem[]>(() => {
                 #{{ rank + 1 }}
               </span>
             </td>
-            <td class="px-4 py-[0.6rem] border-b border-line border-l border-line align-middle">
+            <td class="px-4 py-[0.6rem] border-b border-line border-l align-middle">
               <div class="font-semibold text-ink">{{ item.name }}</div>
               <div v-if="item.details" class="text-[0.72rem] text-ink-muted mt-[1px]">
                 {{ item.details }}
@@ -170,7 +171,7 @@ const ranked = computed<RankedItem[]>(() => {
             <td
               v-for="b in item.breakdown"
               :key="b.cat.id"
-              class="px-4 py-[0.6rem] border-b border-line border-l border-line align-middle"
+              class="px-4 py-[0.6rem] border-b border-line border-l align-middle"
             >
               <div class="text-center">
                 <div class="font-mono font-bold text-ink text-[0.95rem]">{{ b.score }}</div>
@@ -179,7 +180,7 @@ const ranked = computed<RankedItem[]>(() => {
                 </div>
               </div>
             </td>
-            <td class="px-4 py-[0.6rem] border-b border-line border-l border-line align-middle">
+            <td class="px-4 py-[0.6rem] border-b border-line border-l align-middle">
               <div class="text-center">
                 <div
                   class="font-mono font-bold text-[1.05rem]"
