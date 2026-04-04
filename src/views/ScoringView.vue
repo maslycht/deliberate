@@ -40,7 +40,7 @@ function initLocalScores(item: Item | null) {
 }
 
 function getScore(categoryId: string): number | null {
-  return localScores.value[categoryId] ?? currentItem.value?.scores[categoryId] ?? null;
+  return localScores.value[categoryId] ?? null;
 }
 
 function setLocalScore(categoryId: string, score: number) {
@@ -96,9 +96,8 @@ watch(currentIdx, (val) => {
 
 // ─── Handlers ────────────────────────────────────────────────────────────────
 
-function handleSave() {
-  if (currentIdx.value === null || !currentItem.value) return;
-  store.setItemScores(currentItem.value.id, localScores.value);
+function advanceQueue() {
+  if (currentIdx.value === null) return;
   const next = currentIdx.value + 1;
   if (next >= queue.value.length) {
     currentIdx.value = null;
@@ -109,16 +108,15 @@ function handleSave() {
   }
 }
 
+function handleSave() {
+  if (currentIdx.value === null || !currentItem.value) return;
+  store.setItemScores(currentItem.value.id, localScores.value);
+  advanceQueue();
+}
+
 function handleSkip() {
   if (currentIdx.value === null) return;
-  const next = currentIdx.value + 1;
-  if (next >= queue.value.length) {
-    currentIdx.value = null;
-    initLocalScores(null);
-  } else {
-    currentIdx.value = next;
-    initLocalScores(store.items.find((i) => i.id === queue.value[next]) ?? null);
-  }
+  advanceQueue();
 }
 
 function handleBackToList() {
