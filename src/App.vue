@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { RouterLink, RouterView, useRoute } from "vue-router";
+import { useMatrixStore } from "@/stores/matrix";
 
 const route = useRoute();
+const store = useMatrixStore();
 
 const tabs = [
   { name: "setup", label: "Setup", to: { name: "setup" } },
@@ -21,20 +23,28 @@ const tabs = [
         </p>
       </div>
       <nav aria-label="Main navigation" class="ml-auto flex gap-1">
-        <RouterLink
-          v-for="tab in tabs"
-          :key="tab.name"
-          :to="tab.to"
-          :aria-current="route.name === tab.name ? 'page' : undefined"
-          class="px-4 py-[0.4rem] rounded-md text-[0.82rem] font-semibold font-sans border transition-all duration-150 no-underline"
-          :class="
-            route.name === tab.name
-              ? 'bg-accent text-canvas border-accent'
-              : 'bg-transparent text-canvas/75 border-canvas/20 hover:text-canvas'
-          "
-        >
-          {{ tab.label }}
-        </RouterLink>
+        <template v-for="tab in tabs" :key="tab.name">
+          <span
+            v-if="tab.name === 'results' && !store.isReadyForResults"
+            :aria-disabled="true"
+            class="px-4 py-[0.4rem] rounded-md text-[0.82rem] font-semibold font-sans border transition-all duration-150 bg-transparent text-canvas/35 border-canvas/10 cursor-default"
+          >
+            {{ tab.label }}
+          </span>
+          <RouterLink
+            v-else
+            :to="tab.to"
+            :aria-current="route.name === tab.name ? 'page' : undefined"
+            class="px-4 py-[0.4rem] rounded-md text-[0.82rem] font-semibold font-sans border transition-all duration-150 no-underline"
+            :class="
+              route.name === tab.name
+                ? 'bg-accent text-canvas border-accent'
+                : 'bg-transparent text-canvas/75 border-canvas/20 hover:text-canvas'
+            "
+          >
+            {{ tab.label }}
+          </RouterLink>
+        </template>
       </nav>
     </header>
 

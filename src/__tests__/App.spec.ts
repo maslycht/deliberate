@@ -1,5 +1,6 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { mount } from "@vue/test-utils";
+import { setActivePinia, createPinia } from "pinia";
 import { createRouter, createWebHistory } from "vue-router";
 import App from "../App.vue";
 
@@ -14,10 +15,17 @@ const router = createRouter({
   ],
 });
 
+beforeEach(() => {
+  localStorage.clear();
+  setActivePinia(createPinia());
+});
+
 describe("App", () => {
   it("renders the app shell with Deliberate title", async () => {
+    const pinia = createPinia();
+    setActivePinia(pinia);
     const wrapper = mount(App, {
-      global: { plugins: [router] },
+      global: { plugins: [router, pinia] },
     });
     await router.isReady();
     expect(wrapper.text()).toContain("Deliberate");
